@@ -1,19 +1,12 @@
-FROM microsoft/aspnetcore:2.0-nanoserver-sac2016 AS base
+FROM microsoft/dotnet:2.1-sdk as build
 WORKDIR /app
-EXPOSE 80
+COPY . /app
+RUN dotnet publish -c Release -r linux-musl-x64 -o out
 
-FROM microsoft/aspnetcore-build:2.0-nanoserver-sac2016 AS build
-WORKDIR /src
-COPY GobiModApi/GobiModApi.csproj GobiModApi/
-RUN dotnet restore GobiModApi/GobiModApi.csproj
-COPY . .
-WORKDIR /src/GobiModApi
-RUN dotnet build GobiModApi.csproj -c Release -o /app
-
-FROM build AS publish
-RUN dotnet publish GobiModApi.csproj -c Release -o /app
-
-FROM base AS final
+FROM microsoft/dotnet:2.1-runtime-deps-alpine
 WORKDIR /app
-COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "GobiModApi.dll"]
+COPY --from=build /app/out ./
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080/tcp
+ENTRYPOINT [ "./GobiModApi" ]
