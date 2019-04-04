@@ -7,6 +7,5 @@ FROM microsoft/dotnet:2.1-runtime-deps-alpine
 WORKDIR /app
 COPY --from=build /app/out ./
 ENV ASPNETCORE_ENVIRONMENT=Development
-ENV ASPNETCORE_URLS=http://+:8080
-EXPOSE 8080/tcp
+EXPOSE 9500/tcp
 ENTRYPOINT [ "./GobiModApi" ]
